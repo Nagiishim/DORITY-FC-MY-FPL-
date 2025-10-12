@@ -1,28 +1,37 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>DIKE'S FPL — Login</title>
-<link rel="stylesheet" href="style.css">
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-</head>
 <body class="login-body">
+
+  <!-- Login Card -->
   <div class="login-card">
-    <h2>DIKE'S FPL</h2>
-    <input id="email" placeholder="Email (use nagi@example.com for admin)" />
+    <input id="email" placeholder="Email" />
     <input id="password" placeholder="Password" type="password" />
     <button id="btnLogin">Login</button>
     <button id="btnRegister">Register</button>
-    <div class="muted">
-      Admin: <strong>nagi@example.com</strong> / <strong>PAIN2358</strong>
-    </div>
   </div>
 
-<!-- Link to external JS -->
-<script src="index.js"></script>
+  <!-- 1️⃣ Firebase Initialization -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
+      authDomain: "dority-fc-site.firebaseapp.com",
+      projectId: "dority-fc-site",
+      storageBucket: "dority-fc-site.firebasestorage.app",
+      messagingSenderId: "388572626223",
+      appId: "1:388572626223:web:825dcd942c3056fd3df5da",
+      measurementId: "G-FG54ZJ5BRJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.auth = auth;
+    window.db = db;
+  </script>
+
+  <!-- 2️⃣ Your login JS -->
+  <script type="module" src="index.js"></script>
 </body>
-</html>
