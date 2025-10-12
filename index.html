@@ -1,183 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My FPL Team</title>
-  <style>
-    body {
-      font-family: Poppins, sans-serif;
-      background: #f6f6f6;
-      color: #222;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #37003c;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    #budget {
-      margin-top: .3rem;
-      font-size: 0.9em;
-      color: #ddd;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 1rem;
-    }
-    .player-card {
-      perspective: 1000px;
-    }
-    .card-inner {
-      position: relative;
-      width: 100%;
-      height: 150px;
-      transform-style: preserve-3d;
-      transition: transform 0.5s;
-    }
-    .card-inner:hover {
-      transform: rotateY(180deg);
-    }
-    .card-front, .card-back {
-      position: absolute;
-      backface-visibility: hidden;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      height: 150px;
-    }
-    .card-back {
-      transform: rotateY(180deg);
-    }
-    .injured .card-front {
-      background: #ffb3b3;
-    }
-    button {
-      background: #37003c;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
-    h2 {
-      margin-left: 1rem;
-      color: #37003c;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DIKE'S FPL — 4-4-2</title>
+<style>
+  :root{
+    --bg1: #0b2b17;
+    --accent:#00ff88;
+    --panel:#0f1720;
+    --muted: #dbeafe;
+    --card:#0b1220;
+  }
+  *{box-sizing:border-box;font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+  body{margin:0;background:linear-gradient(180deg,#07120a,#082712);color:var(--muted);min-height:100vh;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;background:rgba(0,0,0,0.25);border-bottom:1px solid rgba(255,255,255,0.03)}
+  .brand{display:flex;gap:12px;align-items:center}
+  .brand h1{margin:0;color:var(--accent);font-size:1.2rem;letter-spacing:0.6px}
+  .auth {display:flex;gap:10px;align-items:center}
+  input[type=text], input[type=password] {padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:var(--muted)}
+  button {background:var(--accent);color:#000;border:none;padding:8px 10px;border-radius:8px;font-weight:700;cursor:pointer}
+  main{max-width:1200px;margin:18px auto;padding:0 16px;width:100%}
+
+/* top info */
+.top-row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.info-panel{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;min-width:220px;display:flex;flex-direction:column;gap:8px}
+.info-panel strong{color:var(--accent)}
+.actions{display:flex;gap:8px;align-items:center}
+
+/* layout */
+.layout{display:grid;grid-template-columns: 1fr 420px; gap:16px;margin-top:14px}
+.left-col{display:flex;flex-direction:column;gap:12px}
+.right-col{display:flex;flex-direction:column;gap:12px}
+
+/* pitch */
+.pitch-panel{background:linear-gradient(180deg,#1f6c33,#0b4b21);padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.45)}
+.pitch{width:100%;max-width:820px;margin:0 auto;padding:12px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.06));display:flex;flex-direction:column;gap:14px}
+.pitch-row{display:flex;justify-content:center;gap:12px;align-items:flex-end}
+
+/* slot */
+.slot{min-width:120px;max-width:160px;background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;text-align:center;cursor:pointer;transition:transform .12s}
+.slot.empty{opacity:0.38}
+.slot .name{font-weight:700;color:var(--accent);font-size:0.92rem}
+.slot .meta{font-size:0.82rem;color:rgba(255,255,255,0.9);margin-top:6px}
+
+/* bench */
+.bench-panel{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px}
+.bench-grid{display:flex;gap:8px;flex-wrap:wrap;padding-top:8px}
+.bench-slot{background:rgba(0,0,0,0.25);padding:8px;border-radius:8px;min-width:120px;text-align:center}
+
+/* player pool */
+.pool-panel{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;height:640px;overflow:auto}
+.search-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.pool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.pool-card{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px}
+.pool-card h4{margin:0;color:var(--accent);font-size:0.95rem}
+.pool-meta{font-size:0.85rem;margin-top:6px;color:rgba(255,255,255,0.9)}
+.pool-card .btn{margin-top:8px;background:var(--accent);border:none;padding:6px 8px;border-radius:6px;font-weight:700;cursor:pointer}
+
+/* mobile */
+@media (max-width:1000px){
+  .layout{grid-template-columns:1fr; padding-bottom:40px}
+  .right-col{order:2}
+  .left-col{order:1}
+  .pool-panel{height:420px}
+}
+
+/* small notes */
+.note{font-size:0.88rem;color:rgba(255,255,255,0.75)}
+.foot{margin-top:18px;text-align:center;color:rgba(255,255,255,0.6);font-size:0.9rem}
+</style>
 </head>
 <body>
-  <header>
-    <h1>⚽ My Fantasy Premier League</h1>
-    <div id="budget">Remaining: €<span id="remaining">180</span>m</div>
-  </header>
+<header>
+  <div class="brand">
+    <h1>DIKE'S FPL — 4-4-2</h1>
+    <div class="note">Replica — personal teams saved locally</div>
+  </div>
 
-  <h2>Available Players</h2>
-  <section id="player-grid" class="grid"></section>
+  <div class="auth" id="authControls">
+    <!-- login controls inserted by JS -->
+    <input id="txtUser" type="text" placeholder="username" style="display:none" />
+    <input id="txtPass" type="password" placeholder="password" style="display:none" />
+    <button id="btnLogin" style="display:none">Login / Create</button>
+    <div id="userArea" style="display:none;align-items:center;gap:8px">
+      <div class="note" id="loggedUser"></div>
+      <button id="btnLogout">Logout</button>
+    </div>
+  </div>
+</header>
 
-  <h2>My Team</h2>
-  <section id="my-team" class="grid"></section>
+<main>
+  <div class="top-row">
+    <div class="info-panel">
+      <div>Logged in: <strong id="userName">—</strong></div>
+      <div>Budget left: <strong id="budget">180.0</strong> M€</div>
+      <div>Formation: <strong>4-4-2</strong></div>
+    </div>
+    <div class="info-panel">
+      <div>Total players in squad: <strong id="squadCount">0</strong> / 15</div>
+      <div>Starting XI: <strong id="startingCount">0</strong> / 11</div>
+      <div class="note">Click a player in the pool → added to appropriate slot (starts first), extras go to bench</div>
+    </div>
+  </div>
 
-  <script>
-    const players = [
-      { name: "CHIBUIKE SUCCESS", price: 10, position: "FWD", injured: false },
-      { name: "OKOYE NELSON", price: 9.5, position: "GK", injured: false },
-      { name: "NNADOZIE DESTINY", price: 10.5, position: "DEF", injured: true },
-      { name: "UKONU ANOINTING", price: 15, position: "MID", injured: false },
-      { name: "IBE EMMANUEL", price: 5, position: "FWD", injured: false },
-      { name: "NWANKWO OSITA", price: 10, position: "DEF", injured: false },
-      { name: "NNONSO KELVIN", price: 15, position: "MID", injured: true },
-      { name: "OKEZIE DAVID", price: 10, position: "DEF", injured: false },
-      { name: "DIKE OGBOGU", price: 18, position: "FWD", injured: false },
-      { name: "OKOYE RICHARD", price: 22, position: "GK", injured: false },
-      { name: "ABAYOMI AYOMIDE", price: 25, position: "MID", injured: false },
-      { name: "OKORONKWO AKACHUKWU", price: 25, position: "FWD", injured: true }
-    ];
-
-    const grid = document.getElementById("player-grid");
-    const myTeamGrid = document.getElementById("my-team");
-    const remainingText = document.getElementById("remaining");
-    let budget = 180;
-    let myTeam = [];
-
-    function renderPlayers() {
-      grid.innerHTML = "";
-      players.forEach(p => {
-        const card = document.createElement("div");
-        card.className = `player-card ${p.injured ? "injured" : ""}`;
-        card.innerHTML = `
-          <div class="card-inner">
-            <div class="card-front">
-              ${p.name}
-              ${p.injured ? '<small style="color:red;">⚕️ Injured</small>' : ""}
+  <div class="layout">
+    <div class="left-col">
+      <div class="pitch-panel">
+        <div class="pitch" id="pitch">
+          <!-- GK -->
+          <div class="pitch-row" id="gk-row">
+            <div class="slot empty" data-pos="GK" data-slot="0" id="slot-GK-0">
+              <div class="name">GK</div>
+              <div class="meta">Empty</div>
             </div>
-            <div class="card-back">
-              <p>${p.position}</p>
-              <p>€${p.price}m</p>
-              <button>Add</button>
-            </div>
-          </div>`;
-        card.querySelector("button").addEventListener("click", () => addPlayer(p));
-        grid.appendChild(card);
-      });
-    }
+          </div>
 
-    function renderMyTeam() {
-      myTeamGrid.innerHTML = "";
-      myTeam.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "player-card";
-        card.innerHTML = `
-          <div class="card-inner">
-            <div class="card-front">${p.name}</div>
-            <div class="card-back">
-              <p>${p.position}</p>
-              <p>€${p.price}m</p>
-              <button>Remove</button>
-            </div>
-          </div>`;
-        card.querySelector("button").addEventListener("click", () => removePlayer(p));
-        myTeamGrid.appendChild(card);
-      });
-    }
+          <!-- Defenders (4) -->
+          <div class="pitch-row" id="def-row">
+            <div class="slot empty" data-pos="DEF" data-slot="0" id="slot-DEF-0"><div class="name">DEF</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="DEF" data-slot="1" id="slot-DEF-1"><div class="name">DEF</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="DEF" data-slot="2" id="slot-DEF-2"><div class="name">DEF</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="DEF" data-slot="3" id="slot-DEF-3"><div class="name">DEF</div><div class="meta">Empty</div></div>
+          </div>
 
-    function addPlayer(player) {
-      if (budget < player.price) {
-        alert("Not enough budget!");
-        return;
-      }
-      if (myTeam.find(p => p.name === player.name)) {
-        alert("Already added!");
-        return;
-      }
-      myTeam.push(player);
-      budget -= player.price;
-      remainingText.textContent = budget.toFixed(1);
-      renderMyTeam();
-    }
+          <!-- Midfielders (4) -->
+          <div class="pitch-row" id="mid-row">
+            <div class="slot empty" data-pos="MID" data-slot="0" id="slot-MID-0"><div class="name">MID</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="MID" data-slot="1" id="slot-MID-1"><div class="name">MID</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="MID" data-slot="2" id="slot-MID-2"><div class="name">MID</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="MID" data-slot="3" id="slot-MID-3"><div class="name">MID</div><div class="meta">Empty</div></div>
+          </div>
 
-    function removePlayer(player) {
-      myTeam = myTeam.filter(p => p.name !== player.name);
-      budget += player.price;
-      remainingText.textContent = budget.toFixed(1);
-      renderMyTeam();
-    }
+          <!-- Forwards (2) -->
+          <div class="pitch-row" id="fwd-row">
+            <div class="slot empty" data-pos="FWD" data-slot="0" id="slot-FWD-0"><div class="name">FWD</div><div class="meta">Empty</div></div>
+            <div class="slot empty" data-pos="FWD" data-slot="1" id="slot-FWD-1"><div class="name">FWD</div><div class="meta">Empty</div></div>
+          </div>
+        </div>
 
-    renderPlayers();
-  </script>
+        <!-- bench -->
+        <div style="margin-top:12px" class="bench-panel">
+          <div class="note">Bench (max 4 players)</div>
+          <div id="bench" class="bench-grid"></div>
+        </div>
+      </div>
+
+      <div class="foot">Tip: Click a player on pitch or bench to remove them.</div>
+    </div>
+
+    <aside class="right-col">
+      <div class="pool-panel">
+        <div class="search-row">
+          <input id="search" type="text" placeholder="Search player (name)..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted)"/>
+          <select id="filterPos" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)">
+            <option value="">All</option>
+            <option value="GK">GK</option>
+            <option value="DEF">DEF</option>
+            <option value="MID">MID</option>
+            <option value="FWD">FWD</option>
+          </select>
+        </div>
+
+        <div id="pool" class="pool-grid"></div>
+      </div>
+    </aside>
+  </div>
+
+</main>
+
+<script>
+/* =========================
+   DATA: ALL PLAYERS (YOUR LIST)
+   Names are UPPERCASE, no injury flags
+   ========================= */
+const ALL_PLAYERS = [
+  { name: "CHIBUIKE SUCCESS", price: 10, pos: "MID" },
+  { name: "OKOYE NELSON", price: 9.5, pos: "GK" },
+  { name: "NNADOZIE DESTINY", price: 10.5, pos: "GK" },
+  { name: "UKONU ANOINTING", price: 15, pos: "DEF" },
+  { name: "IBE EMMANUEL", price: 5, pos: "MID" },
+  { name: "NWANKWO OSITA", price: 10, pos: "DEF" },
+  { name: "JAMES NKWUMAH", price: 5, pos: "MID" },
+  { name: "OKONKWO GERARD", price: 5, pos: "DEF" },
+  { name: "NNAJI MICHAEL", price: 8, pos: "MID" },
+  { name: "IHEANACHO PRAISE", price: 5, pos: "FWD" },
+  { name: "CHIAMAEZE OWN", price: 10, pos: "FWD" },
+  { name: "EZUEGO ENU", price: 10, pos: "DEF" },
+  { name: "MAC DONALD", price: 10, pos: "MID" },
+  { name: "OKWUDIRI SOLOMON", price: 10, pos: "DEF" },
+  { name: "EKE EMMANUEL", price: 7.5, pos: "MID" },
+  { name: "EMOLE JULES", price: 7, pos: "DEF" },
+  { name: "NNONA KELVIN", price: 15, pos: "DEF" },
+  { name: "EGEMOLE HENRY", price: 10, pos: "DEF" },
+  { name: "UZOMA PERFECT", price: 8, pos: "MID" },
+  { name: "IBEZUE CHINEDU", price: 8, pos: "MID" },
+  { name: "ONUOHA OSCAR", price: 8.5, pos: "DEF" },
+  { name: "NNADOZIE DIVINE", price: 10, pos: "GK" },
+  { name: "OKOYE VICTOR", price: 11, pos: "MID" },
+  { name: "ILLONA PRINCEWILL", price: 11, pos: "MID" },
+  { name: "OPARA JOHNSON", price: 12, pos: "DEF" },
+  { name: "CHIBUIKE FAITHFUL", price: 8, pos: "MID" },
+  { name: "IFEJIAGWA IKECHUKWU", price: 20, pos: "FWD" },
+  { name: "ENUKA RAMSEY", price: 4, pos: "MID" },
+  { name: "UDOH KENNETH", price: 10, pos: "DEF" },
+  { name: "UWANDU DELIGHT", price: 4.5, pos: "MID" },
+  { name: "KINGSLEY IBEZUE", price: 10, pos: "FWD" },
+  { name: "NDUISI SUCCESS", price: 10, pos: "MID" },
+  { name: "EGBE BETHEL", price: 12, pos: "MID" },
+  { name: "IGBONACHO SIXTUS", price: 14, pos: "FWD" },
+  { name: "JOSEPH PROSPER", price: 10, pos: "DEF" },
+  { name: "AUGUSTIN OKECHUKWU", price: 10, pos: "DEF" },
+  { name: "OKEZIE DAVID", price: 10, pos: "MID" },
+  { name: "ONYEMA VICTOR", price: 10, pos: "FWD" },
+  { name: "NWANKWO CHUKWUEMEKA", price: 13, pos: "MID" },
+  { name: "MICHAEL ANUDU", price: 10, pos: "MID" },
+  { name: "GOODLUCK AMAEFULE", price: 6, pos: "DEF" },
+  { name: "CHUKWUMA JUSTIN", price: 13, pos: "FWD" },
+  { name: "ONUOHA ISAAC", price: 7, pos: "DEF" },
+  { name: "NWACHUKWU MARTINS", price: 11, pos: "MID" },
+  { name: "OFOMA RAPHAEL", price: 11, pos: "DEF" },
+  { name: "ONUOHA SAMUEL", price: 13, pos: "DEF" },
+  { name: "ERNEST KELVIN", price: 9, pos: "MID" },
+  { name: "UCHECHRIS PROSPER", price: 12, pos: "FWD" },
+  { name: "IHEJI JOSEPH", price: 9, pos: "DEF" },
+  { name: "ALABOGU ERNEST", price: 6, pos: "DEF" },
+  { name: "MOSES PATRIC", price: 5, pos: "MID" },
+  { name: "DIKE OGBOGU", price: 18, pos: "MID" },
+  { name: "EJIKE NOBLE", price: 3, pos: "MID" },
+  { name: "DIM OBINNA", price: 3, pos: "DEF" },
+  { name: "MIRACLE C", price: 3, pos: "MID" },
+  { name: "OKOYE RICHARD", price: 22, pos: "GK" },
+  { name: "UKA", price: 8, pos: "DEF" },
+  { name: "EMMANUEL VICTOR", price: 6, pos: "FWD" },
+  { name: "KALU EKE", price: 21, pos: "FWD" },
+  { name: "NNAJI TEMPLE", price: 18, pos: "MID" },
+  { name: "OGUERI HENRY", price: 9, pos: "DEF" },
+  { name: "KALU JULES", price: 8, pos: "DEF" },
+  { name: "ABAYOMI AYOMIDE", price: 25, pos: "FWD" },
+  { name: "OKORONKWO AKACHUKWU", price: 25, pos: "FWD" }
+];
+
+/* ========== App state ========== */
+const MAX_SQUAD = 15;
+const STARTING_XI = { GK:1, DEF:4, MID:4, FWD:2 };
+const STARTING_COUNT = Object.values(STARTING_XI).reduce((a,b)=>a+b,0); // 11
+const INITIAL_BUDGET = 180.0;
+
+let pool = [...ALL_PLAYERS]; // working copy
+let currentUser = localStorage.getItem('currentUser') || null;
+
+/* ======= DOM ======= */
+const poolEl = document.getElementById('pool');
+const searchEl = document.getElementById('search');
+const filterEl = document.getElementById('filterPos');
+
+const budgetEl = document.getElementById('budget');
+const squadCountEl = document.getElementById('squadCount');
+const startingCountEl = document.getElementById('startingCount');
+
+const benchEl = document.getElementById('bench');
+
+const userNameEl = document.getElementById('userName');
+
+const authControls = {
+  txtUser: document.getElementById('txtUser'),
+  txtPass: document.getElementById('txtPass'),
+  btnLogin: document.getElementById('btnLogin'),
+  userArea: document.getElementById('userArea'),
+  loggedUser: document.getElementById('loggedUser'),
+  btnLogout: document.getElementById('btnLogout')
+};
+
+/* ======= LOGIN & USER STORAGE ======= */
+let USERS = JSON.parse(localStorage.getItem('fplUsers') || '{}');
+
+function showAuthUI(){
+  if (currentUser && USERS[currentUser]) {
+    authControls.txtUser.style.display = 'none';
+    authControls.txtPass.style.display = 'none';
+    authControls.btnLogin.style.display = 'none';
+    authControls.userArea.style.display = 'flex';
+    authControls.loggedUser.textContent = currentUser;
+    userNameEl.textContent = currentUser;
+  } else {
+    authControls.txtUser.style.display = 'inline-block';
+    authControls.txtPass.style.display = 'inline-block';
+    authControls.btnLogin.style.display = 'inline-block';
+    authControls.userArea.style.display = 'none';
+    userNameEl.textContent = '—';
+  }
+}
+
+authControls.btnLogin.addEventListener('click', () => {
+  const u = authControls.txtUser.value.trim();
+  const p = authControls.txtPass.value.trim();
+  if (!u || !p) return alert('Enter username & password');
+  // create or verify
+  if (!USERS[u]) {
+    USERS[u] = { password: p, team: [], bench: [] };
+  } else if (USERS[u].password !== p) {
+    return alert('Incorrect password');
+  }
+  currentUser = u;
+  localStorage.setItem('fplUsers', JSON.stringify(USERS));
+  localStorage.setItem('currentUser', currentUser);
+  showAuthUI();
+  renderAll();
+});
+
+authControls.btnLogout.addEventListener('click', () => {
+  localStorage.removeItem('currentUser');
+  currentUser = null;
+  showAuthUI();
+  renderAll();
+});
+
+/* ======= Utility ======= */
+function getUserData(){
+  if (!currentUser) return { team: [], bench: [] };
+  USERS = JSON.parse(localStorage.getItem('fplUsers') || '{}');
+  return USERS[currentUser] || { team: [], bench: [] };
+}
+
+function saveUserData(data){
+  if (!currentUser) return;
+  USERS = JSON.parse(localStorage.getItem('fplUsers') || '{}');
+  USERS[currentUser] = { ...USERS[currentUser], ...data };
+  localStorage.setItem('fplUsers', JSON.stringify(USERS));
+}
+
+/* ======= Rendering Pool ======= */
+function renderPool(){
+  const q = searchEl.value.trim().toLowerCase();
+  const posFilter = filterEl.value;
+  poolEl.innerHTML = '';
+  pool.forEach(p => {
+    if (posFilter && p.pos !== posFilter) return;
+    if (q && !p.name.toLowerCase().includes(q)) return;
+    const card = document.createElement('div');
+    card.className = 'pool-card';
+    card.innerHTML = `
+      <h4>${p.name}</h4>
+      <div class="pool-meta">${p.pos} • €${p.price.toFixed(1)}m</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <button class="add-btn">Add</button>
+        <div class="note" style="font-size:0.82rem;color:rgba(255,255,255,0.7)">${availabilityText(p.name)}</div>
+      </div>
+    `;
+    card.querySelector('.add-btn').addEventListener('click', () => onAddPlayer(p));
+    poolEl.appendChild(card);
+  });
+}
+
+function availabilityText(playerName){
+  const data = getUserData();
+  const all = [...data.team, ...data.bench];
+  return all.find(x=>x.name===playerName) ? 'Selected' : '';
+}
+
+/* ======= Pitch slots helpers ======= */
+function getSlotElements(){
+  const slots = {
+    GK: [document.getElementById('slot-GK-0')],
+    DEF: [document.getElementById('slot-DEF-0'),document.getElementById('slot-DEF-1'),document.getElementById('slot-DEF-2'),document.getElementById('slot-DEF-3')],
+    MID: [document.getElementById('slot-MID-0'),document.getElementById('slot-MID-1'),document.getElementById('slot-MID-2'),document.getElementById('slot-MID-3')],
+    FWD: [document.getElementById('slot-FWD-0'),document.getElementById('slot-FWD-1')]
+  };
+  return slots;
+}
+
+/* ======= Add / Remove logic ======= */
+function onAddPlayer(player){
+  if (!currentUser) return alert('Please login first (top-right).');
+  const data = getUserData();
+  const squadSize = (data.team || []).length + (data.bench || []).length;
+  if (squadSize >= MAX_SQUAD) return alert('Squad full (15 players). Remove someone from bench or team first.');
+  // budget check
+  const spent = (data.team||[]).reduce((s,p)=>s+p.price,0) + (data.bench||[]).reduce((s,p)=>s+p.price,0);
+  const remaining = INITIAL_BUDGET - spent;
+  if (remaining < player.price) return alert('Not enough budget for this player.');
+
+  // prevent duplicate
+  if ((data.team||[]).some(p=>p.name===player.name) || (data.bench||[]).some(p=>p.name===player.name)) {
+    return alert('Player already in your squad.');
+  }
+
+  // try to place into starting XI slot for that position if free
+  const slots = getSlotElements();
+  const assignedSlots = countStartingByPos(data.team || []);
+  const maxNeeded = STARTING_XI[player.pos];
+  if (assignedSlots[player.pos] < maxNeeded) {
+    // add to team (starting XI)
+    data.team.push(player);
+  } else {
+    // put on bench
+    data.bench = data.bench || [];
+    data.bench.push(player);
+  }
+
+  saveUserData({ team: data.team, bench: data.bench });
+  renderAll();
+}
+
+/* count how many starting per pos in team */
+function countStartingByPos(team){
+  const counts = { GK:0, DEF:0, MID:0, FWD:0 };
+  (team||[]).forEach(p => { if (counts[p.pos] !== undefined) counts[p.pos]++; });
+  return counts;
+}
+
+/* Remove: clicking on a slot or bench removes the player */
+function onRemovePlayerFromTeam(playerName){
+  const data = getUserData();
+  data.team = (data.team||[]).filter(p=>p.name !== playerName);
+  data.bench = (data.bench||[]).filter(p=>p.name !== playerName);
+  saveUserData({ team: data.team, bench: data.bench });
+  renderAll();
+}
+
+/* ======= Render pitch + bench + counts + budget ======= */
+function renderPitchAndBench(){
+  // clear slots
+  const slots = getSlotElements();
+  Object.values(slots).flat().forEach(s => {
+    s.classList.add('empty');
+    s.innerHTML = `<div class="name">${s.dataset.pos}</div><div class="meta">Empty</div>`;
+  });
+
+  const data = getUserData();
+  const team = data.team || [];
+  // place starters by pos: fill GK first, then DEF positions left-to-right, MID, FWD.
+  const placed = { GK:0, DEF:0, MID:0, FWD:0 };
+  team.forEach(p => {
+    const pos = p.pos;
+    const slotIndex = placed[pos];
+    const slotEl = slots[pos][slotIndex];
+    if (slotEl){
+      slotEl.classList.remove('empty');
+      slotEl.innerHTML = `<div class="name">${p.name}</div><div class="meta">${p.pos} • €${p.price.toFixed(1)}m</div>`;
+      // clicking removes player
+      slotEl.onclick = () => { if (confirm('Remove '+p.name+'?')) onRemovePlayerFromTeam(p.name); };
+      placed[pos] = placed[pos] + 1;
+    }
+  });
+
+  // bench
+  benchEl.innerHTML = '';
+  (data.bench || []).forEach(p => {
+    const b = document.createElement('div');
+    b.className = 'bench-slot';
+    b.innerHTML = `<div style="font-weight:700;color:var(--accent)">${p.name}</div><div style="font-size:0.86rem">${p.pos} • €${p.price.toFixed(1)}m</div><div style="margin-top:8px"><button class="remove" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:6px;border-radius:6px">Remove</button></div>`;
+    b.querySelector('.remove').addEventListener('click', ()=> { if (confirm('Remove '+p.name+' from bench?')) onRemovePlayerFromTeam(p.name); });
+    benchEl.appendChild(b);
+  });
+
+  // counts and budget
+  const squadSize = ((data.team||[]).length + (data.bench||[]).length);
+  squadCountEl.textContent = squadSize;
+  startingCountEl.textContent = ((data.team||[]).length);
+
+  // budget
+  const spent = (data.team||[]).reduce((s,p)=>s+p.price,0) + (data.bench||[]).reduce((s,p)=>s+p.price,0);
+  const remaining = (INITIAL_BUDGET - spent);
+  budgetEl.textContent = remaining.toFixed(1);
+}
+
+/* ======= Render everything ======= */
+function renderAll(){
+  // ensure pool shows available not-selected players
+  const data = getUserData();
+  const selectedNames = new Set([...(data.team||[]).map(x=>x.name), ...(data.bench||[]).map(x=>x.name)]);
+  pool = ALL_PLAYERS.filter(p => !selectedNames.has(p.name));
+  renderPool();
+  renderPitchAndBench();
+  // update auth UI
+  showAuthUI();
+}
+
+/* ======= Search & filter events ======= */
+searchEl.addEventListener('input', renderPool);
+filterEl.addEventListener('change', renderPool);
+
+/* ======= Startup ======= */
+showAuthUI();
+renderAll();
+
+/* ======= Keyboard: pressing Enter on login fields triggers login btn ======= */
+authControls.txtPass.addEventListener('keypress', (e)=>{ if (e.key === 'Enter') authControls.btnLogin.click(); });
+authControls.txtUser.addEventListener('keypress', (e)=>{ if (e.key === 'Enter') authControls.btnLogin.click(); });
+
+</script>
 </body>
 </html>
 
- 
 
-
+  
