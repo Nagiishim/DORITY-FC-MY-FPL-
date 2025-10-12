@@ -1,18 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>DIKE'S FPL — Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
 <body class="login-body">
 
-  <!-- Login Card -->
   <div class="login-card">
-    <input id="email" placeholder="Email" />
+    <h2>DIKE'S FPL</h2>
+    <input id="email" placeholder="Email (use nagi@example.com for admin)" />
     <input id="password" placeholder="Password" type="password" />
     <button id="btnLogin">Login</button>
     <button id="btnRegister">Register</button>
+    <div class="muted">
+      Admin: <strong>nagi@example.com</strong> / <strong>PAIN2358</strong>
+    </div>
   </div>
 
-  <!-- 1️⃣ Firebase Initialization -->
+  <!-- Firebase Initialization -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
@@ -28,10 +39,12 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.auth = auth;
+    window.auth = auth; // make globally accessible
     window.db = db;
   </script>
 
-  <!-- 2️⃣ Your login JS -->
+  <!-- Login/Registration Script -->
   <script type="module" src="index.js"></script>
+
 </body>
+</html>
