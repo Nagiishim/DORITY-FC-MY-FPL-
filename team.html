@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Team - FPL</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>⚽ My Fantasy Team</h1>
+    <div id="welcome"></div>
+    <div id="budget">Remaining: €<span id="remaining">180.0</span>m</div>
+    <button id="logout">Logout</button>
+  </header>
+
+  <main>
+    <h2>Available Players</h2>
+    <section id="player-grid" class="grid"></section>
+
+    <h2>My Team</h2>
+    <section id="my-team" class="grid"></section>
+  </main>
+
+  <script src="players.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
