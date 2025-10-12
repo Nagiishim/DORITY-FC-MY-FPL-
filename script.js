@@ -1,21 +1,7 @@
-/* 
-  FPL-like team manager
-  - Uses €180M budget
-  - Players auto-arrange by position (we guessed positions)
-  - You can change any player's position from the pool BEFORE adding
-  - Pick up to 15 players
-  - Choose captain (double points) inside team
-  - Points editable per player, total recalculated (captain doubles)
-  - Data saved to localStorage
-*/
-
 // DOM
 const playersContainer = document.getElementById("players-container");
 const budgetDisplay = document.getElementById("budget");
-const gkSlot = document.getElementById("gk-slot");
-const defSlot = document.getElementById("def-slot");
-const midSlot = document.getElementById("mid-slot");
-const fwdSlot = document.getElementById("fwd-slot");
+const flashcardsGrid = document.getElementById("flashcards-grid");
 const totalPointsEl = document.getElementById("total-points");
 
 const poolSection = document.getElementById("pool-section");
@@ -28,9 +14,8 @@ const autoFillBtn = document.getElementById("autoFill");
 
 // state
 let budget = parseFloat(localStorage.getItem("budget")) || 180.0;
-let myTeam = JSON.parse(localStorage.getItem("myTeam")) || []; // array of player objects
+let myTeam = JSON.parse(localStorage.getItem("myTeam")) || [];
 let players = JSON.parse(localStorage.getItem("playersPool")) || [
-  // ALL NAMES UPPERCASE — guessed position (default 'MID' if not sure)
   { name: "CHIBUIKE SUCCESS", price: 10, position: "MID" },
   { name: "OKOYE NELSON", price: 9.5, position: "FWD" },
   { name: "NNADOZIE DESTINY", price: 10.5, position: "GK" },
@@ -82,7 +67,7 @@ let players = JSON.parse(localStorage.getItem("playersPool")) || [
   { name: "IHEJI JOSEPH", price: 9, position: "DEF" },
   { name: "ALABOGU ERNEST", price: 6, position: "DEF" },
   { name: "MOSES PATRIC", price: 5, position: "MID" },
-  { name: "DIKE OGBOGU", price: 18, position: "LB" },
+  { name: "DIKE OGBOGU", price: 18, position: "MID" },
   { name: "EJIKE NOBLE", price: 3, position: "MID" },
   { name: "DIM OBINNA", price: 3, position: "MID" },
   { name: "MIRACLE C", price: 3, position: "MID" },
@@ -97,7 +82,6 @@ let players = JSON.parse(localStorage.getItem("playersPool")) || [
   { name: "OKORONKWO AKACHUKWU", price: 25, position: "FWD" }
 ];
 
-// helpers
 const POS = ["GK","DEF","MID","FWD"];
 const MAX_PLAYERS = 15;
 
@@ -159,49 +143,87 @@ function addPlayerToTeam(player){
   persistAll();
 }
 
-// render team into slots grouped by position
+// render team as flashcards grid
 function renderTeam(){
-  // clear
-  [gkSlot, defSlot, midSlot, fwdSlot].forEach(el => el.innerHTML = "");
+  flashcardsGrid.innerHTML = "";
 
-  // place players by position
   myTeam.forEach((p, idx) => {
-    const slot = document.createElement("div");
-    slot.className = "slot";
-    let captainMark = p.captain ? ' <span class="cap-badge">👑</span>' : "";
-    slot.innerHTML = `
-      <div class="name">${p.name}${captainMark}</div>
-      <div class="meta">€${p.price.toFixed(1)}M • ${p.position}</div>
-      <div class="meta">Points: <input class="pt-input" data-idx="${idx}" type="number" value="${p.points}" style="width:70px" /></div>
-      <button class="cap-btn" data-idx="${idx}" title="Make Captain">C</button>
-      <button class="remove-btn" data-idx="${idx}" title="Remove">✕</button>
+    const wrapper = document.createElement("div");
+    wrapper.className = "card-3d";
+
+    const inner = document.createElement("div");
+    inner.className = "card-inner";
+    if (p.captain) inner.classList.add("is-flipped"); // optional: show rotated state if wanted
+
+    // front
+    const front = document.createElement("div");
+    front.className = "card-face card-front";
+    front.innerHTML = `
+      <div>
+        <div class="name">${p.name}</div>
+        <div class="sub">${p.position}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-weight:800">€${p.price.toFixed(1)}M</div>
+        <div style="font-size:0.95rem;color:rgba(255,255,255,0.8)">Tap to flip</div>
+      </div>
     `;
 
-    // attach to correct slot container
-    if (p.position === "GK") gkSlot.appendChild(slot);
-    else if (p.position === "DEF") defSlot.appendChild(slot);
-    else if (p.position === "MID") midSlot.appendChild(slot);
-    else fwdSlot.appendChild(slot);
+    // back
+    const back = document.createElement("div");
+    back.className = "card-face card-back";
+    back.innerHTML = `
+      <div>
+        <div class="meta">€${p.price.toFixed(1)}M</div>
+        <div class="meta"><small>Position: ${p.position}</small></div>
+        <div class="meta"><small>Points: <input class="pt-input" data-idx="${idx}" type="number" value="${p.points}" style="width:70px" /></small></div>
+      </div>
+      <div class="back-controls">
+        <button class="cap-btn" data-idx="${idx}" title="Make Captain">Set Captain</button>
+        <button class="remove-btn" data-idx="${idx}" title="Remove">Remove</button>
+      </div>
+    `;
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    wrapper.appendChild(inner);
+    flashcardsGrid.appendChild(wrapper);
+
+    // flip handler (click anywhere on the card)
+    inner.addEventListener("click", (e) => {
+      // prevent flipping when clicking input / buttons on back
+      if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.closest('button')) return;
+      inner.classList.toggle("is-flipped");
+    });
+
+    // points input listener (on back)
+    back.querySelector(".pt-input").addEventListener("input", (ev) => {
+      const val = parseFloat(ev.target.value) || 0;
+      myTeam[idx].points = val;
+      calculateTotalPoints();
+      persistAll();
+    });
+
+    // set captain
+    back.querySelector(".cap-btn").addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      setCaptain(idx);
+    });
+
+    // remove player
+    back.querySelector(".remove-btn").addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      removePlayer(idx);
+    });
+
+    // highlight captain visually
+    if (p.captain) {
+      inner.classList.add("is-flipped"); // keep flipped so captain stands out
+      wrapper.querySelector(".card-front")?.classList.add("captain");
+      wrapper.querySelector(".card-back")?.classList.add("captain");
+    }
   });
 
-  // listeners for remove, captain, points change
-  document.querySelectorAll(".remove-btn").forEach(b => b.addEventListener("click",(e)=>{
-    const i = +e.target.dataset.idx;
-    removePlayer(i);
-  }));
-  document.querySelectorAll(".cap-btn").forEach(b => b.addEventListener("click",(e)=>{
-    const i = +e.target.dataset.idx;
-    setCaptain(i);
-  }));
-  document.querySelectorAll(".pt-input").forEach(inp => inp.addEventListener("input",(e)=>{
-    const i = +e.target.dataset.idx;
-    const val = parseFloat(e.target.value) || 0;
-    myTeam[i].points = val;
-    calculateTotalPoints();
-    persistAll();
-  }));
-
-  // update budget display and total points
   budgetDisplay.textContent = budget.toFixed(1);
   calculateTotalPoints();
   persistAll();
@@ -210,7 +232,6 @@ function renderTeam(){
 function removePlayer(idx){
   const player = myTeam[idx];
   if (!player) return;
-  // refund price
   budget = +(budget + player.price);
   myTeam.splice(idx,1);
   renderTeam();
@@ -260,9 +281,7 @@ saveBtn.addEventListener("click", () => {
 autoFillBtn.addEventListener("click", ()=>{
   const remain = MAX_PLAYERS - myTeam.length;
   if (remain <= 0) { alert("Team is full"); return; }
-  // candidates not already in team and affordable
   const available = players.filter(p => !myTeam.find(x => x.name === p.name));
-  // shuffle
   for (let i=available.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     [available[i],available[j]] = [available[j],available[i]];
