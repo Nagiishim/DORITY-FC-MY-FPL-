@@ -4,79 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>DIKE'S FPL — My Team</title>
-<style>
-body {
-  font-family: Poppins, sans-serif;
-  background: #07120a;
-  color: #dbeafe;
-  margin: 0;
-  padding: 0;
-}
-header {
-  background: #00ff88;
-  color: #000;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-h1 { margin: 0; font-size: 1.4rem; }
-button {
-  background: #07120a;
-  color: #00ff88;
-  border: 1px solid #00ff88;
-  border-radius: 8px;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-weight: 600;
-}
-.budget {
-  padding: 8px;
-  background: rgba(255,255,255,0.05);
-  text-align: center;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
-  gap: 10px;
-  padding: 20px;
-}
-.player-card {
-  background: rgba(255,255,255,0.07);
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
-  transition: transform .2s;
-}
-.player-card:hover { transform: scale(1.05); }
-.player-card button {
-  margin-top: 6px;
-  width: 100%;
-  border: none;
-  background: #00ff88;
-  color: #000;
-  font-weight: 700;
-  border-radius: 6px;
-  padding: 6px;
-  cursor: pointer;
-}
-.player-card .remove { background: #ff4a4a; color: white; }
-.section-title {
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 20px;
-  color: #00ff88;
-}
-</style>
-
-<!-- Firebase -->
+<link rel="stylesheet" href="style.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-<!-- Your player list -->
 <script src="player.js"></script>
-
 </head>
 <body>
 <header>
@@ -85,14 +17,13 @@ button {
 </header>
 <div class="budget">Remaining Budget: €<span id="remaining">180.0</span>m</div>
 
-<div class="section-title">My Team (4–4–2)</div>
+<h2>My Team (4–4–2)</h2>
 <div id="my-team" class="grid"></div>
 
-<div class="section-title">Available Players</div>
+<h2>Available Players</h2>
 <div id="player-grid" class="grid"></div>
 
 <script>
-/* ---------- Firebase Init ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
   authDomain: "dority-fc-site.firebaseapp.com",
@@ -115,39 +46,34 @@ const budget = 180;
 let myTeam = [];
 let remaining = budget;
 
-/* ---------- Auth check ---------- */
 auth.onAuthStateChanged(async (user) => {
-  if (!user) return window.location.href = "index.html";
+  if(!user) return window.location.href="index.html";
 
   welcomeEl.textContent = `Welcome, ${user.email}`;
   const ref = db.collection("users").doc(user.uid);
   const snap = await ref.get();
 
-  if (snap.exists) {
-    myTeam = snap.data().team || [];
-  } else {
-    await ref.set({ email: user.email, team: [], totalPoints: 0 });
-  }
+  if(snap.exists) myTeam = snap.data().team || [];
+  else await ref.set({ email: user.email, team: [], totalPoints:0 });
 
   remaining = budget - myTeam.reduce((a,p)=>a+p.price,0);
   remainingEl.textContent = remaining.toFixed(1);
+
   renderPlayers();
   renderMyTeam();
 });
 
-/* ---------- Logout ---------- */
 document.getElementById("logout").addEventListener("click", async ()=>{
   await auth.signOut();
-  window.location.href = "index.html";
+  window.location.href="index.html";
 });
 
-/* ---------- Render Players ---------- */
 function renderPlayers(){
   grid.innerHTML = "";
-  players.forEach((p)=>{
+  players.forEach(p=>{
     const card = document.createElement("div");
-    card.className = "player-card";
-    card.innerHTML = `
+    card.className="player-card";
+    card.innerHTML=`
       <div>${p.name}</div>
       <div>${p.position}</div>
       <div>€${p.price}m</div>
@@ -158,49 +84,9 @@ function renderPlayers(){
   });
 }
 
-/* ---------- Render My Team ---------- */
 function renderMyTeam(){
   myTeamGrid.innerHTML = "";
-  myTeam.forEach((p)=>{
+  myTeam.forEach(p=>{
     const card = document.createElement("div");
-    card.className = "player-card";
-    card.innerHTML = `
-      <div>${p.name}</div>
-      <div>${p.position}</div>
-      <div>€${p.price}m</div>
-      <button class="remove">Remove</button>
-    `;
-    card.querySelector(".remove").addEventListener("click", ()=>removePlayer(p));
-    myTeamGrid.appendChild(card);
-  });
-}
-
-/* ---------- Add / Remove Players ---------- */
-async function addPlayer(player){
-  if(remaining < player.price) return alert("Not enough budget!");
-  if(myTeam.find(p=>p.name===player.name)) return alert("Already in team!");
-  myTeam.push(player);
-  remaining -= player.price;
-  await saveTeam();
-}
-
-async function removePlayer(player){
-  const idx = myTeam.findIndex(p=>p.name===player.name);
-  if(idx>=0){
-    myTeam.splice(idx,1);
-    remaining += player.price;
-    await saveTeam();
-  }
-}
-
-/* ---------- Save Team to Firebase ---------- */
-async function saveTeam(){
-  const user = auth.currentUser;
-  if(!user) return;
-  await db.collection("users").doc(user.uid).update({ team: myTeam });
-  remainingEl.textContent = remaining.toFixed(1);
-  renderMyTeam();
-}
-</script>
-</body>
-</html>
+    card.className="player-card";
+    card.innerHTML=
