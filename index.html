@@ -1,46 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - My FPL</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My FPL Team</title>
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      background: #f6f6f6;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #37003c;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    #budget {
+      margin-top: .3rem;
+      font-size: 0.9em;
+      color: #ddd;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem;
+    }
+    .player-card {
+      perspective: 1000px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+    }
+    .card-inner:hover {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      backface-visibility: hidden;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 150px;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+    .injured .card-front {
+      background: #ffb3b3;
+    }
+    button {
+      background: #37003c;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    h2 {
+      margin-left: 1rem;
+      color: #37003c;
+    }
+  </style>
 </head>
-<body class="login-body">
-  <div class="login-card">
-    <h1>⚽ My FPL Login</h1>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button id="loginBtn">Login</button>
-    <p class="note">Your data is stored safely in your browser.</p>
-  </div>
+<body>
+  <header>
+    <h1>⚽ My Fantasy Premier League</h1>
+    <div id="budget">Remaining: €<span id="remaining">180</span>m</div>
+  </header>
+
+  <h2>Available Players</h2>
+  <section id="player-grid" class="grid"></section>
+
+  <h2>My Team</h2>
+  <section id="my-team" class="grid"></section>
 
   <script>
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.addEventListener('click', () => {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+    const players = [
+      { name: "CHIBUIKE SUCCESS", price: 10, position: "FWD", injured: false },
+      { name: "OKOYE NELSON", price: 9.5, position: "GK", injured: false },
+      { name: "NNADOZIE DESTINY", price: 10.5, position: "DEF", injured: true },
+      { name: "UKONU ANOINTING", price: 15, position: "MID", injured: false },
+      { name: "IBE EMMANUEL", price: 5, position: "FWD", injured: false },
+      { name: "NWANKWO OSITA", price: 10, position: "DEF", injured: false },
+      { name: "NNONSO KELVIN", price: 15, position: "MID", injured: true },
+      { name: "OKEZIE DAVID", price: 10, position: "DEF", injured: false },
+      { name: "DIKE OGBOGU", price: 18, position: "FWD", injured: false },
+      { name: "OKOYE RICHARD", price: 22, position: "GK", injured: false },
+      { name: "ABAYOMI AYOMIDE", price: 25, position: "MID", injured: false },
+      { name: "OKORONKWO AKACHUKWU", price: 25, position: "FWD", injured: true }
+    ];
 
-      if (!username || !password) {
-        alert("Enter both username and password");
+    const grid = document.getElementById("player-grid");
+    const myTeamGrid = document.getElementById("my-team");
+    const remainingText = document.getElementById("remaining");
+    let budget = 180;
+    let myTeam = [];
+
+    function renderPlayers() {
+      grid.innerHTML = "";
+      players.forEach(p => {
+        const card = document.createElement("div");
+        card.className = `player-card ${p.injured ? "injured" : ""}`;
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">
+              ${p.name}
+              ${p.injured ? '<small style="color:red;">⚕️ Injured</small>' : ""}
+            </div>
+            <div class="card-back">
+              <p>${p.position}</p>
+              <p>€${p.price}m</p>
+              <button>Add</button>
+            </div>
+          </div>`;
+        card.querySelector("button").addEventListener("click", () => addPlayer(p));
+        grid.appendChild(card);
+      });
+    }
+
+    function renderMyTeam() {
+      myTeamGrid.innerHTML = "";
+      myTeam.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">${p.name}</div>
+            <div class="card-back">
+              <p>${p.position}</p>
+              <p>€${p.price}m</p>
+              <button>Remove</button>
+            </div>
+          </div>`;
+        card.querySelector("button").addEventListener("click", () => removePlayer(p));
+        myTeamGrid.appendChild(card);
+      });
+    }
+
+    function addPlayer(player) {
+      if (budget < player.price) {
+        alert("Not enough budget!");
         return;
       }
+      if (myTeam.find(p => p.name === player.name)) {
+        alert("Already added!");
+        return;
+      }
+      myTeam.push(player);
+      budget -= player.price;
+      remainingText.textContent = budget.toFixed(1);
+      renderMyTeam();
+    }
 
-      const userData = JSON.parse(localStorage.getItem(username)) || {
-        password,
-        team: []
-      };
+    function removePlayer(player) {
+      myTeam = myTeam.filter(p => p.name !== player.name);
+      budget += player.price;
+      remainingText.textContent = budget.toFixed(1);
+      renderMyTeam();
+    }
 
-      // save if new
-      localStorage.setItem(username, JSON.stringify(userData));
-      localStorage.setItem("currentUser", username);
-
-      window.location.href = "team.html";
-    });
+    renderPlayers();
   </script>
 </body>
 </html>
 
-  
  
+
 
