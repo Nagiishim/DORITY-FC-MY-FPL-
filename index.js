@@ -1,10 +1,4 @@
-<!-- team.html -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="player.js"></script>
-<script>
-/* ---------- FIREBASE CONFIG ---------- */
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
   authDomain: "dority-fc-site.firebaseapp.com",
@@ -15,114 +9,68 @@ const firebaseConfig = {
   measurementId: "G-FG54ZJ5BRJ"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ---------- UI Setup ---------- */
-const grid = document.getElementById("player-grid");
-const myTeamGrid = document.getElementById("my-team");
-const remainingEl = document.getElementById("remaining");
-const welcomeEl = document.getElementById("welcome");
+// Admin credentials
+const adminEmail = "nagi@example.com";
+const adminPass = "PAIN2358";
 
-const budget = 180;
-let myTeam = [];
-let remaining = budget;
-
-/* ---------- Auth check ---------- */
-auth.onAuthStateChanged(async (user) => {
-  if (!user) return (window.location.href = "index.html");
-
-  welcomeEl.textContent = `Welcome, ${user.email}`;
-  const ref = db.collection("users").doc(user.uid);
-  const snap = await ref.get();
-
-  if (snap.exists) {
-    myTeam = snap.data().team || [];
-  } else {
-    await ref.set({ email: user.email, team: [], totalPoints: 0 });
-  }
-
-  remaining = budget - myTeam.reduce((a, p) => a + p.price, 0);
-  remainingEl.textContent = remaining.toFixed(1);
-  renderPlayers();
-  renderMyTeam();
-});
-
-/* ---------- Logout ---------- */
-document.getElementById("logout").addEventListener("click", async () => {
-  await auth.signOut();
-  window.location.href = "index.html";
-});
-
-/* ---------- Render players ---------- */
-function renderPlayers() {
-  grid.innerHTML = "";
-  players.forEach((p) => {
-    const card = document.createElement("div");
-    card.className = "player-card";
-    card.innerHTML = `
-      <div class="card-inner">
-        <div class="card-front">${p.name}</div>
-        <div class="card-back">
-          <p>${p.position}</p>
-          <p>€${p.price}m</p>
-          <button class="add">Add</button>
-        </div>
-      </div>
-    `;
-    card.querySelector(".add").addEventListener("click", () => addPlayer(p));
-    grid.appendChild(card);
-  });
-}
-
-/* ---------- Render My Team ---------- */
-function renderMyTeam() {
-  myTeamGrid.innerHTML = "";
-  myTeam.forEach((p) => {
-    const card = document.createElement("div");
-    card.className = "player-card";
-    card.innerHTML = `
-      <div class="card-inner">
-        <div class="card-front">${p.name}</div>
-        <div class="card-back">
-          <p>${p.position}</p>
-          <p>€${p.price}m</p>
-          <button class="remove">Remove</button>
-        </div>
-      </div>
-    `;
-    card.querySelector(".remove").addEventListener("click", () => removePlayer(p));
-    myTeamGrid.appendChild(card);
-  });
-}
-
-/* ---------- Add / Remove Players ---------- */
-async function addPlayer(player) {
-  if (remaining < player.price) return alert("Not enough budget!");
-  if (myTeam.find((p) => p.name === player.name)) return alert("Already in team!");
-
-  myTeam.push(player);
-  remaining -= player.price;
-  await saveTeam();
-}
-
-async function removePlayer(player) {
-  const idx = myTeam.findIndex((p) => p.name === player.name);
-  if (idx >= 0) {
-    myTeam.splice(idx, 1);
-    remaining += player.price;
-    await saveTeam();
+// Ensure admin exists
+async function ensureAdmin() {
+  try {
+    await auth.signInWithEmailAndPassword(adminEmail, adminPass);
+    await auth.signOut();
+  } catch (e) {
+    if (e.code === "auth/user-not-found") {
+      const cred = await auth.createUserWithEmailAndPassword(adminEmail, adminPass);
+      await db.collection("users").doc(cred.user.uid).set({
+        email: adminEmail,
+        team: [],
+        totalPoints: 0
+      });
+      await auth.signOut();
+    }
   }
 }
+ensureAdmin();
 
-/* ---------- Save to Firebase ---------- */
-async function saveTeam() {
-  const user = auth.currentUser;
-  if (!user) return;
+// Login
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('password').value.trim();
+  if (!email || !pass) return alert("Enter email and password");
 
-  await db.collection("users").doc(user.uid).update({ team: myTeam });
-  remainingEl.textContent = remaining.toFixed(1);
-  renderMyTeam();
-}
-</script>
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    const user = auth.currentUser;
+    const ref = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if (!snap.exists) await ref.set({ email: user.email, team: [], totalPoints: 0 });
+    window.location.href = "team.html";
+  } catch (e) {
+    alert("Login error: " + e.message);
+  }
+});
+
+// Register
+document.getElementById('btnRegister').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('password').value.trim();
+  if (!email || !pass) return alert("Enter email and password");
+
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection("users").doc(cred.user.uid).set({ email, team: [], totalPoints: 0 });
+    alert("Registered! You can now log in.");
+  } catch (e) {
+    alert("Register error: " + e.message);
+  }
+});
+
+// Auto redirect if logged in
+auth.onAuthStateChanged(user => {
+  if (user) window.location.href = "team.html";
+});
