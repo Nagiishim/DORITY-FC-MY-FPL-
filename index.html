@@ -1,35 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DIKE’S FPL TEAM</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DIKE'S FPL — My Team</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>⚽ DIKE’S FANTASY PREMIER LEAGUE</h1>
-    <p>Select your dream team within €180M budget!</p>
+  <header class="site-header">
+    <div class="brand">
+      <h1>DIKE'S FPL</h1>
+      <p class="subtitle">Your Team • Budget: €180.0M</p>
+    </div>
+    <nav>
+      <button id="show-pool" class="nav-btn active">Player Pool</button>
+      <button id="show-team" class="nav-btn">My Team</button>
+    </nav>
   </header>
 
   <main>
-    <section id="players">
+    <!-- Player pool -->
+    <section id="pool-section" class="panel">
       <h2>AVAILABLE PLAYERS</h2>
+      <p class="hint">Change a player's position here if you want — then click <strong>Add</strong>.</p>
       <div id="players-container" class="grid"></div>
     </section>
 
-    <section id="my-team">
-      <h2>MY TEAM — Budget Left: <span id="budget">180.0</span>M</h2>
-      <div id="team-container" class="grid"></div>
-      <button id="saveTeam">💾 Save Team</button>
-      <button id="resetTeam">🔄 Reset</button>
+    <!-- My Team / Pitch -->
+    <section id="team-section" class="panel hidden">
+      <div class="team-top">
+        <h2>MY TEAM</h2>
+        <div class="budget-box">Budget Left: <strong id="budget">180.0</strong>M</div>
+      </div>
+
+      <div class="pitch">
+        <div class="row gk-row">
+          <h3>GOALKEEPERS</h3>
+          <div id="gk-slot" class="slot-row"></div>
+        </div>
+
+        <div class="row def-row">
+          <h3>DEFENDERS</h3>
+          <div id="def-slot" class="slot-row"></div>
+        </div>
+
+        <div class="row mid-row">
+          <h3>MIDFIELDERS</h3>
+          <div id="mid-slot" class="slot-row"></div>
+        </div>
+
+        <div class="row fwd-row">
+          <h3>FORWARDS</h3>
+          <div id="fwd-slot" class="slot-row"></div>
+        </div>
+      </div>
+
+      <div class="team-controls">
+        <div class="score-box">Total Points: <strong id="total-points">0</strong></div>
+        <div class="buttons">
+          <button id="saveTeam">💾 Save Team</button>
+          <button id="resetTeam">🔄 Reset</button>
+          <button id="autoFill" title="Fill remaining slots randomly (for testing)">🤖 Auto-fill</button>
+        </div>
+      </div>
+
+      <div class="hint bottom-hint">
+        Pick up to <strong>15 players</strong>. You can change any player's position later from the pool.
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>© 2025 DIKE’S FPL TEAM — All Rights Reserved</p>
+    <p>Made with ❤️ — DIKE'S FPL • Saved locally in your browser</p>
   </footer>
 
   <script src="script.js"></script>
 </body>
 </html>
+
