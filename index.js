@@ -1,4 +1,7 @@
-import { auth, db } from "./index.html"; // uses global window.auth/db if needed
+// index.js
+import { auth, db } from "./firebase.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const adminEmail = "nagi@example.com";
 const adminPass = "PAIN2358";
@@ -6,7 +9,7 @@ const adminPass = "PAIN2358";
 // Ensure admin exists
 async function ensureAdmin() {
   try {
-    await auth.signInWithEmailAndPassword(adminEmail, adminPass);
+    await signInWithEmailAndPassword(auth, adminEmail, adminPass);
     await auth.signOut();
   } catch (e) {
     if (e.code === "auth/user-not-found") {
