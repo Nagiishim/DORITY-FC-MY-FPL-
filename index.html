@@ -4,30 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>DIKE'S FPL — Login</title>
-<style>
-  body{font-family:Poppins,Inter,system-ui;background:#07120a;color:#dbeafe;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-  .card{background:rgba(255,255,255,0.03);padding:28px;border-radius:12px;width:340px}
-  input{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-  button{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:none;background:#00ff88;color:#000;font-weight:700;cursor:pointer}
-  .muted{color:rgba(255,255,255,0.75);font-size:0.9rem;text-align:center;margin-top:8px}
-</style>
-
-<!-- Firebase compat libs -->
+<link rel="stylesheet" href="style.css">
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
 </head>
-<body>
-<div class="card">
-  <h2 style="margin:0 0 8px 0;color:#00ff88">DIKE'S FPL</h2>
-  <input id="email" placeholder="email (use nagi@example.com for admin)" />
-  <input id="password" placeholder="password" type="password" />
-  <button id="btnLogin">Login</button>
-  <button id="btnRegister" style="background:#ffd24a">Register</button>
-  <div class="muted">Admin: <strong>nagi@example.com</strong> / <strong>PAIN2358</strong></div>
-  <div class="muted">After login you are redirected to the team page.</div>
-</div>
+<body class="login-body">
+  <div class="login-card">
+    <h2>DIKE'S FPL</h2>
+    <input id="email" placeholder="Email (use nagi@example.com for admin)" />
+    <input id="password" placeholder="Password" type="password" />
+    <button id="btnLogin">Login</button>
+    <button id="btnRegister">Register</button>
+    <div class="muted">
+      Admin: <strong>nagi@example.com</strong> / <strong>PAIN2358</strong>
+    </div>
+  </div>
 
 <script>
 const firebaseConfig = {
@@ -44,19 +37,17 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 /* ---------- Auto-create admin ---------- */
-const adminEmail = 'nagi@example.com';
-const adminPass = 'PAIN2358';
+const adminEmail = "nagi@example.com";
+const adminPass = "PAIN2358";
 
-async function ensureAdmin(){
-  try{
-    // try login first
+async function ensureAdmin() {
+  try {
     await auth.signInWithEmailAndPassword(adminEmail, adminPass);
     await auth.signOut();
-  } catch(e){
-    if(e.code === "auth/user-not-found"){
-      // create user
+  } catch (e) {
+    if (e.code === "auth/user-not-found") {
       const cred = await auth.createUserWithEmailAndPassword(adminEmail, adminPass);
-      await db.collection('users').doc(cred.user.uid).set({ email: adminEmail, team: [], totalPoints:0 });
+      await db.collection("users").doc(cred.user.uid).set({ email: adminEmail, team: [], totalPoints:0 });
       await auth.signOut();
     }
   }
@@ -64,41 +55,43 @@ async function ensureAdmin(){
 ensureAdmin();
 
 /* ---------- Login ---------- */
-document.getElementById('btnLogin').addEventListener('click', async ()=>{
+document.getElementById('btnLogin').addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const pass = document.getElementById('password').value.trim();
-  if(!email || !pass) return alert('Enter email and password');
-  try{
+  if (!email || !pass) return alert("Enter email and password");
+
+  try {
     await auth.signInWithEmailAndPassword(email, pass);
-    const u = auth.currentUser;
-    const ref = db.collection('users').doc(u.uid);
+    const user = auth.currentUser;
+    const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
-    if(!snap.exists){
-      await ref.set({ email:u.email, team:[], totalPoints:0 });
+    if (!snap.exists) {
+      await ref.set({ email: user.email, team: [], totalPoints:0 });
     }
-    window.location.href = 'team.html';
-  } catch(e){
-    alert('Login error: '+e.message);
+    window.location.href = "team.html";
+  } catch(e) {
+    alert("Login error: " + e.message);
   }
 });
 
 /* ---------- Register ---------- */
-document.getElementById('btnRegister').addEventListener('click', async ()=>{
+document.getElementById('btnRegister').addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const pass = document.getElementById('password').value.trim();
-  if(!email || !pass) return alert('Enter email and password');
-  try{
+  if (!email || !pass) return alert("Enter email and password");
+
+  try {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.collection('users').doc(cred.user.uid).set({ email, team:[], totalPoints:0 });
-    alert('Registered. You can now log in.');
-  } catch(e){
-    alert('Register error: '+e.message);
+    await db.collection("users").doc(cred.user.uid).set({ email, team: [], totalPoints:0 });
+    alert("Registered. You can now log in.");
+  } catch(e) {
+    alert("Register error: " + e.message);
   }
 });
 
-/* ---------- Auto-redirect if logged in ---------- */
-auth.onAuthStateChanged(user=>{
-  if(user) window.location.href='team.html';
+/* ---------- Auto redirect if logged in ---------- */
+auth.onAuthStateChanged(user => {
+  if (user) window.location.href = "team.html";
 });
 </script>
 </body>
