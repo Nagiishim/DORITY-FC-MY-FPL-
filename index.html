@@ -1,63 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DIKE'S FPL — My Team (Flashcards)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - My FPL</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header class="site-header">
-    <div class="brand">
-      <h1>DIKE'S FPL</h1>
-      <p class="subtitle">Your Team • Budget: €180.0M</p>
-    </div>
-    <nav>
-      <button id="show-pool" class="nav-btn active">Player Pool</button>
-      <button id="show-team" class="nav-btn">My Team</button>
-    </nav>
-  </header>
+<body class="login-body">
+  <div class="login-card">
+    <h1>⚽ My FPL Login</h1>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="loginBtn">Login</button>
+    <p class="note">Your data is stored safely in your browser.</p>
+  </div>
 
-  <main>
-    <!-- Player pool -->
-    <section id="pool-section" class="panel">
-      <h2>AVAILABLE PLAYERS</h2>
-      <p class="hint">Change a player's position here if you want — then click <strong>Add</strong>.</p>
-      <div id="players-container" class="grid"></div>
-    </section>
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.addEventListener('click', () => {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-    <!-- My Team / Flashcards -->
-    <section id="team-section" class="panel hidden">
-      <div class="team-top">
-        <h2>MY TEAM</h2>
-        <div class="budget-box">Budget Left: <strong id="budget">180.0</strong>M</div>
-      </div>
+      if (!username || !password) {
+        alert("Enter both username and password");
+        return;
+      }
 
-      <div class="flashcards-grid" id="flashcards-grid"></div>
+      const userData = JSON.parse(localStorage.getItem(username)) || {
+        password,
+        team: []
+      };
 
-      <div class="team-controls">
-        <div class="score-box">Total Points: <strong id="total-points">0</strong></div>
-        <div class="buttons">
-          <button id="saveTeam">💾 Save Team</button>
-          <button id="resetTeam">🔄 Reset</button>
-          <button id="autoFill" title="Fill remaining slots randomly (for testing)">🤖 Auto-fill</button>
-        </div>
-      </div>
+      // save if new
+      localStorage.setItem(username, JSON.stringify(userData));
+      localStorage.setItem("currentUser", username);
 
-      <div class="hint bottom-hint">
-        Pick up to <strong>15 players</strong>. Tap any card to flip and edit Points / set Captain / remove.
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>Made with ❤️ — DIKE'S FPL • Saved locally in your browser</p>
-  </footer>
-
-  <script src="script.js"></script>
+      window.location.href = "team.html";
+    });
+  </script>
 </body>
 </html>
 
-
-    
+  
  
+
