@@ -1,44 +1,141 @@
+/* ---------- Login page ---------- */
 .login-body {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #37003c;
+  background: #07120a;
+  font-family: Poppins, sans-serif;
+  color: #dbeafe;
+  margin: 0;
 }
 
 .login-card {
-  background: white;
-  color: #37003c;
+  background: rgba(255,255,255,0.05);
   padding: 30px;
   border-radius: 15px;
-  width: 300px;
+  width: 320px;
   text-align: center;
 }
 
 .login-card input {
   width: 90%;
   padding: 10px;
-  margin: 10px;
+  margin: 10px 0;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: #dbeafe;
+}
+
+.login-card input::placeholder {
+  color: rgba(219, 234, 254, 0.7);
 }
 
 button {
-  background: #00ff85;
+  background: #00ff88;
   border: none;
-  color: #37003c;
-  font-weight: 600;
-  padding: 10px 20px;
+  color: #000;
+  font-weight: 700;
+  padding: 10px 0;
+  margin: 10px 0;
+  width: 95%;
   border-radius: 8px;
   cursor: pointer;
 }
 
-.injury {
-  color: red;
-  font-size: 1.2em;
-  margin-left: 5px;
+button:hover {
+  opacity: 0.9;
 }
 
-.injured .card-front {
-  background: #ff7272 !important;
+.muted {
+  color: rgba(219,234,254,0.7);
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+/* ---------- Team Page ---------- */
+body {
+  background: #07120a;
+  margin: 0;
+  font-family: Poppins, sans-serif;
+  color: #dbeafe;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #00ff88;
+  color: #000;
+}
+
+header h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+header button {
+  padding: 8px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #00ff88;
+  background: #07120a;
+  color: #00ff88;
+  cursor: pointer;
+}
+
+.budget {
+  text-align: center;
+  padding: 10px 0;
+  background: rgba(255,255,255,0.05);
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 20px;
+}
+
+.player-card {
+  background: rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.player-card:hover {
+  transform: translateY(-3px);
+}
+
+.card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-front {
+  font-weight: 600;
+}
+
+.card-back p {
+  margin: 4px 0;
+}
+
+.card-back button {
+  margin-top: 6px;
+  background: #00ff88;
+  color: #000;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.card-back button:hover {
+  opacity: 0.9;
 }
