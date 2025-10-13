@@ -4,13 +4,12 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
-  authDomain: "dority-fc-site.firebaseapp.com",
-  projectId: "dority-fc-site",
-  storageBucket: "dority-fc-site.firebasestorage.app",
-  messagingSenderId: "388572626223",
-  appId: "1:388572626223:web:825dcd942c3056fd3df5da",
-  measurementId: "G-FG54ZJ5BRJ"
+  apiKey: "YOUR_NEW_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
