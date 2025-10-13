@@ -1,21 +1,19 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// firebase.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
   authDomain: "dority-fc-site.firebaseapp.com",
   projectId: "dority-fc-site",
   storageBucket: "dority-fc-site.firebasestorage.app",
   messagingSenderId: "388572626223",
-  appId: "1:388572626223:web:825dcd942c3056fd3df5da",
-  measurementId: "G-FG54ZJ5BRJ"
+  appId: "1:388572626223:web:825dcd942c3056fd3df5da"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
