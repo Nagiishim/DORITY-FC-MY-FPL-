@@ -1,92 +1,28 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>DIKE'S FPL — My Team</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="player.js"></script>
 </head>
 <body>
+
 <header>
-  <h1 id="welcome">My FPL Team</h1>
+  <h1 id="welcome">Welcome</h1>
   <button id="logout">Logout</button>
 </header>
-<div class="budget">Remaining Budget: €<span id="remaining">180.0</span>m</div>
 
-<h2>My Team (4–4–2)</h2>
-<div id="my-team" class="grid"></div>
+<div class="budget">
+  Remaining Budget: €<span id="remaining">0</span>m
+</div>
 
 <h2>Available Players</h2>
 <div id="player-grid" class="grid"></div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCFknCEG0zQjTVpPCs49zm_ERzalXC63Pg",
-  authDomain: "dority-fc-site.firebaseapp.com",
-  projectId: "dority-fc-site",
-  storageBucket: "dority-fc-site.firebasestorage.app",
-  messagingSenderId: "388572626223",
-  appId: "1:388572626223:web:825dcd942c3056fd3df5da",
-  measurementId: "G-FG54ZJ5BRJ"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+<h2>My Team (4-4-2)</h2>
+<div id="my-team" class="grid"></div>
 
-const grid = document.getElementById("player-grid");
-const myTeamGrid = document.getElementById("my-team");
-const remainingEl = document.getElementById("remaining");
-const welcomeEl = document.getElementById("welcome");
-
-const budget = 180;
-let myTeam = [];
-let remaining = budget;
-
-auth.onAuthStateChanged(async (user) => {
-  if(!user) return window.location.href="index.html";
-
-  welcomeEl.textContent = `Welcome, ${user.email}`;
-  const ref = db.collection("users").doc(user.uid);
-  const snap = await ref.get();
-
-  if(snap.exists) myTeam = snap.data().team || [];
-  else await ref.set({ email: user.email, team: [], totalPoints:0 });
-
-  remaining = budget - myTeam.reduce((a,p)=>a+p.price,0);
-  remainingEl.textContent = remaining.toFixed(1);
-
-  renderPlayers();
-  renderMyTeam();
-});
-
-document.getElementById("logout").addEventListener("click", async ()=>{
-  await auth.signOut();
-  window.location.href="index.html";
-});
-
-function renderPlayers(){
-  grid.innerHTML = "";
-  players.forEach(p=>{
-    const card = document.createElement("div");
-    card.className="player-card";
-    card.innerHTML=`
-      <div>${p.name}</div>
-      <div>${p.position}</div>
-      <div>€${p.price}m</div>
-      <button class="add">Add</button>
-    `;
-    card.querySelector(".add").addEventListener("click", ()=>addPlayer(p));
-    grid.appendChild(card);
-  });
-}
-
-function renderMyTeam(){
-  myTeamGrid.innerHTML = "";
-  myTeam.forEach(p=>{
-    const card = document.createElement("div");
-    card.className="player-card";
-    card.innerHTML=
+<script type="module" src="team.js"></script>
+</body>
+</html>
