@@ -1,24 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DIKE'S FPL — My Team</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>School Fantasy Team</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    table{width:100%;border-collapse:collapse;margin:1rem 0}
+    th,td{padding:.5rem;border:1px solid #ddd;text-align:left}
+    th{background:#f4f4f4}
+    .budget{margin:1rem 0;font-weight:bold}
+    .btn-select{padding:.3rem .6rem;border-radius:4px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+    .btn-select:disabled{background:#ccc;cursor:not-allowed}
+  </style>
 </head>
 <body>
-<header>
-  <h1 id="welcome">Welcome</h1>
-  <button id="logout">Logout</button>
-</header>
-<div class="budget">Remaining Budget: €<span id="remaining">180</span>m</div>
+  <header class="site-header small">
+    <div class="container">
+      <div class="brand">
+        <img src="assets/img/logo-placeholder.png" alt="logo" class="logo">
+        <a href="index.html" class="brand-title">School Fantasy League</a>
+      </div>
+      <nav class="main-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="team.html">My Team</a>
+        <a href="login.html">Logout</a>
+      </nav>
+    </div>
+  </header>
 
-<h2>Your Team</h2>
-<div id="my-team" class="grid"></div>
+  <main class="container">
+    <h2>Pick Your School Fantasy Team</h2>
+    <div class="budget">Budget Remaining: €<span id="budget">180</span>m</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Price (€m)</th>
+          <th>Select</th>
+        </tr>
+      </thead>
+      <tbody id="playerList"></tbody>
+    </table>
+  </main>
 
-<h2>Available Players</h2>
-<div id="player-grid" class="grid"></div>
+  <script>
+    const players = [
+      {name:"CHIBUIKE SUCCESS", price:10}, {name:"OKOYE NELSON", price:9.5},
+      {name:"NNADOZIE DESTINY", price:10.5}, {name:"UKONU ANOINTING", price:15},
+      {name:"IBE EMMANUEL", price:5}, {name:"NWANKWO OSITA", price:10},
+      {name:"JAMES NKWUMAH", price:5}, {name:"OKONKNWO GERARD", price:5},
+      {name:"NNAJI MICHAEL", price:8}, {name:"IHEANACHO PRAISE", price:5},
+      {name:"CHIAMAEZE OWN", price:10}, {name:"EZUEGO ENU", price:10},
+      {name:"MAC DONALD", price:10}, {name:"OKWUDIRI SOLOMON", price:10},
+      {name:"EKE EMMANUEL", price:7.5}, {name:"EMOLE JULES", price:7},
+      {name:"NNONA KELVIN", price:15}, {name:"EGEMOLE HENRY", price:10},
+      {name:"UZOMA PERFECT", price:8}, {name:"IBEZUE CHINEDU", price:8},
+      {name:"ONUOHA OSCAR", price:8.5}, {name:"NNADOZIE DIVINE", price:10},
+      {name:"OKOYE VICTOR", price:11}, {name:"ILLONA PRINCEWILL", price:11},
+      {name:"OPARA JOHNSON", price:12}, {name:"CHIBUIKE FAITHFUL", price:8},
+      {name:"IFEJIAGWA IKECHUKWU", price:20}, {name:"ENUKA RAMSEY", price:4},
+      {name:"UDOH KENNETH", price:10}, {name:"UWANDU DELIGHT", price:4.5},
+      {name:"KINGSLEY IBEZUE", price:10}, {name:"NDUISI SUCCESS", price:10},
+      {name:"EGBE BETHEL", price:12}, {name:"IGBONACHO SIXTUS", price:14},
+      {name:"JOSEPH PROSPER", price:10}, {name:"AUGUSTIN OKECHUKWU", price:10},
+      {name:"OKEZIE DAVID", price:10}, {name:"ONYEMA VICTOR", price:10},
+      {name:"NWANKWO CHUKWUEMEKA", price:13}, {name:"MICHAEL ANUDU", price:10},
+      {name:"GOODLUCK AMAEFULE", price:6}, {name:"CHUKWUMA JUSTIN", price:13},
+      {name:"ONUOHA ISAAC", price:7}, {name:"NWACHUKWU MARTINS", price:11},
+      {name:"OFOMA RAPHAEL", price:11}, {name:"ONUOHA SAMUEL", price:13},
+      {name:"ERNEST KELVIN", price:9}, {name:"UCHECHRIS PROSPER", price:12},
+      {name:"IHEJI JOSEPH", price:9}, {name:"ALABOGU ERNEST", price:6},
+      {name:"MOSES PATRIC", price:5}, {name:"DIKE OGBOGU", price:18},
+      {name:"EJIKE NOBLE", price:3}, {name:"DIM OBINNA", price:3},
+      {name:"MIRACLE C", price:3}, {name:"OKOYE RICHARD", price:22},
+      {name:"UKA", price:8}, {name:"EMMANUEL VICTOR", price:6},
+      {name:"KALU EKE", price:21}, {name:"NNAJI TEMPLE", price:18},
+      {name:"OGUERI HENRY", price:9}, {name:"KALU JULES", price:8},
+      {name:"ABAYOMI AYOMIDE", price:25}, {name:"OKORONKWO AKACHUKWU", price:25}
+    ];
 
-<script type="module" src="team.js"></script>
+    let budget = 180;
+    const storedSelection = JSON.parse(localStorage.getItem('schoolTeam')) || {};
+    const playerListEl = document.getElementById('playerList');
+    const budgetEl = document.getElementById('budget');
+
+    players.forEach((p, i) => {
+      const tr = document.createElement('tr');
+      const selected = storedSelection[p.name] || false;
+      if(selected) budget -= p.price;
+      tr.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td><button class="btn-select" data-index="${i}">${selected ? 'Selected' : 'Select'}</button></td>
+      `;
+      playerListEl.appendChild(tr);
+    });
+
+    budgetEl.textContent = budget.toFixed(1);
+
+    playerListEl.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('btn-select')){
+        const i = e.target.dataset.index;
+        const player = players[i];
+        const isSelected = storedSelection[player.name] || false;
+
+        if(isSelected){
+          storedSelection[player.name] = false;
+          budget += player.price;
+          e.target.textContent = 'Select';
+        } else {
+          if(player.price <= budget){
+            storedSelection[player.name] = true;
+            budget -= player.price;
+            e.target.textContent = 'Selected';
+          } else {
+            alert('Not enough budget!');
+          }
+        }
+        localStorage.setItem('schoolTeam', JSON.stringify(storedSelection));
+        budgetEl.textContent = budget.toFixed(1);
+      }
+    });
+  </script>
 </body>
 </html>
