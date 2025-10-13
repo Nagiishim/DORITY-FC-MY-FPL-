@@ -2,7 +2,18 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Full player list
+let currentUser;
+let userData;
+let myTeam = [];
+const budget = 180;
+let remaining = budget;
+
+const welcomeEl = document.getElementById("welcome");
+const remainingEl = document.getElementById("remaining");
+const myTeamGrid = document.getElementById("my-team");
+const playerGrid = document.getElementById("player-grid");
+const logoutBtn = document.getElementById("logout");
+
 const players = [
   {name:"CHIBUIKE SUCCESS", position:"FWD", price:10},
   {name:"OKOYE NELSON", position:"GK", price:9.5},
@@ -43,4 +54,32 @@ const players = [
   {name:"OKEZIE DAVID", position:"DEF", price:10},
   {name:"ONYEMA VICTOR", position:"MID", price:10},
   {name:"NWANKWO CHUKWUEMEKA", position:"MID", price:13},
-  {name:"MICHAEL ANUDU
+  {name:"MICHAEL ANUDU", position:"MID", price:10},
+  {name:"GOODLUCK AMAEFULE", position:"MID", price:6},
+  {name:"CHUKWUMA JUSTIN", position:"DEF", price:13},
+  {name:"ONUOHA ISAAC", position:"DEF", price:7},
+  {name:"NWACHUKWU MARTINS", position:"MID", price:11},
+  {name:"OFOMA RAPHAEL", position:"MID", price:11},
+  {name:"ONUOHA SAMUEL", position:"DEF", price:13},
+  {name:"ERNEST KELVIN", position:"MID", price:9},
+  {name:"UCHECHRIS PROSPER", position:"MID", price:12},
+  {name:"IHEJI JOSEPH", position:"MID", price:9},
+  {name:"ALABOGU ERNEST", position:"DEF", price:6},
+  {name:"MOSES PATRIC", position:"MID", price:5},
+  {name:"DIKE OGBOGU", position:"MID", price:18},
+  {name:"EJIKE NOBLE", position:"MID", price:3},
+  {name:"DIM OBINNA", position:"MID", price:3},
+  {name:"MIRACLE C", position:"MID", price:3},
+  {name:"OKOYE RICHARD", position:"GK", price:22},
+  {name:"UKA EMMANUEL", position:"MID", price:8},
+  {name:"KALU EKE", position:"MID", price:21},
+  {name:"NNAJI TEMPLE", position:"MID", price:18},
+  {name:"OGUERI HENRY", position:"MID", price:9},
+  {name:"KALU JULES", position:"MID", price:8},
+  {name:"ABAYOMI AYOMIDE", position:"MID", price:25},
+  {name:"OKORONKWO AKACHUKWU", position:"MID", price:25}
+];
+
+// Wait for Firebase auth
+onAuthStateChanged(auth, async user=>{
+  if(!user) return
