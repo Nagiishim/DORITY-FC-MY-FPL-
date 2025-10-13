@@ -4,11 +4,10 @@ import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/
 
 const emailInput = document.getElementById("email");
 const passInput = document.getElementById("password");
-
 const adminEmail = "nagi@example.com";
 const adminPass = "PAIN2358";
 
-// Auto-create admin if not exists
+// Ensure admin exists
 async function ensureAdmin() {
   try {
     await signInWithEmailAndPassword(auth, adminEmail, adminPass);
@@ -16,41 +15,41 @@ async function ensureAdmin() {
   } catch(e) {
     if(e.code === "auth/user-not-found") {
       const cred = await createUserWithEmailAndPassword(auth, adminEmail, adminPass);
-      await setDoc(doc(db, "users", cred.user.uid), { email: adminEmail, team: [], totalPoints: 0 });
+      await setDoc(doc(db,"users",cred.user.uid),{email:adminEmail,team:[],totalPoints:0});
       await auth.signOut();
     }
   }
 }
-
 ensureAdmin();
 
+// Login
 document.getElementById("btnLogin").addEventListener("click", async ()=>{
   const email = emailInput.value.trim();
   const pass = passInput.value.trim();
-  if(!email || !pass) return alert("Enter email and password");
+  if(!email||!pass) return alert("Enter email and password");
   try{
-    await signInWithEmailAndPassword(auth, email, pass);
-    window.location.href = "team.html";
-  } catch(e){
+    await signInWithEmailAndPassword(auth,email,pass);
+    window.location.href="team.html";
+  }catch(e){
     alert("Login error: "+e.message);
   }
 });
 
+// Register
 document.getElementById("btnRegister").addEventListener("click", async ()=>{
   const email = emailInput.value.trim();
   const pass = passInput.value.trim();
-  if(!email || !pass) return alert("Enter email and password");
+  if(!email||!pass) return alert("Enter email and password");
   try{
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(doc(db, "users", cred.user.uid), { email, team: [], totalPoints: 0 });
+    const cred = await createUserWithEmailAndPassword(auth,email,pass);
+    await setDoc(doc(db,"users",cred.user.uid),{email,team:[],totalPoints:0});
     alert("Registered. You can now log in.");
-  } catch(e){
+  }catch(e){
     alert("Register error: "+e.message);
   }
 });
 
-onAuthStateChanged(auth, user=>{
-  if(user){
-    window.location.href="team.html";
-  }
+// Redirect if already logged in
+onAuthStateChanged(auth,user=>{
+  if(user) window.location.href="team.html";
 });
